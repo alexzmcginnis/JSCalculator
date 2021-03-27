@@ -1,3 +1,5 @@
+//***!!still need to do function/eventhandler of positive/negative button  */
+
 //define variables for buttons with values and decimal
 let zero = document.getElementById('zero');
 let one = document.getElementById('one');
@@ -58,9 +60,7 @@ function numFunction (event) {
     }
       //display screenstring in screen
     screen.innerHTML = screenstring;
-    
-    //next need to change this to an input...string maybe not the best format
-    
+    //need to make this an input string    
     //should probably take decimal out of hte array and create a separate event listner for it to append to string, but include removeEventListener if it is clicked once so it cannot be clicked twice
         
     }
@@ -110,7 +110,7 @@ let operatorFunction = function(event){
         operatorArray.push(event.target.value);
         buttonArray.push(event.target.value);
         megastring += event.target.value;
-        //console.log(operatorArray);
+        console.log(buttonArray);
         console.log(megastring);
         //right now the h3 happening is overwritten , need to add code to keep track of all operations/numbers
         happening.innerHTML = megastring;
@@ -128,63 +128,83 @@ multiplyButton.addEventListener('click', operatorFunction);
 //this variable will be so after hitting equals can resume arithmetic
 let afterEquals = false; 
 
+//define a reusable function to solve multiplication and division in the aray 
+//and leave only + - operations
+let multiplyDivideFunction = (bArray) => {
+    let i=1;
+    while(i<bArray.length){
+        //console.log(i);
+        //every odd i because those are the operators
+        if(bArray[i] === '+' || bArray[i] === '-'){
+            i = i+ 2;
+        }
+        if(bArray[i] === '*'){
+            let x = bArray[i-1] * bArray[i+1];
+            bArray.splice(i-1, 3, x);
+            //use recursion to do same thing until all multiplies are done
+            multiplyDivideFunction(bArray)
+   
+        }
+        if(bArray[i] === '/'){
+            let x = bArray[i-1] / bArray[i+1];
+            console.log('x:  ' + x)
+            bArray.splice(i-1, 3, x);
+            //use recursion to do same thing until all multiplies are done
+            multiplyDivideFunction(bArray)
+   
+        }
+        
+        return bArray;
+}
+}
+
+//now do a reusable function for add subtract,
+//this will be applied ot the array that has multiplication/division 
+//removed
+
+let addSubtractFunction = (bArray) =>{
+    let i = 1;
+    while(i<bArray.length){
+        if(bArray[i] === '+'){
+            let x = bArray[i-1] + bArray[i+1];
+            bArray.splice(i-1, 3, x);
+            //use recursion to do same thing until all multiplies are done
+            addSubtractFunction(bArray)
+   
+        }else if(bArray[i] === '-'){
+            let x = bArray[i-1] - bArray[i+1];
+            console.log('x:  ' + x)
+            bArray.splice(i-1, 3, x);
+            //use recursion to do same thing until all multiplies are done
+            addSubtractFunction(bArray)
+   
+        }
+
+    }
+    return bArray;
+}
+
 let equalsFunction = function () {
     numberArray.push(parseFloat(screenstring));
     buttonArray.push(parseFloat(screenstring));
-    console.log('equals!')
-    //need to iterate fhrough buttonArray, find divide and multiply signs first, then use them to operate on surrounding elements first and then replace with the result , then do add and minus
-    
-    for(let i=0; i<buttonArray.length-1; i++){
-        //console.log(i);
-        if(buttonArray[i] === '*'){
-            x = buttonArray[i-1] * buttonArray[i+1];
-            //replace buttonArray[i-1],[i].[i+1] with x
-            buttonArray.splice(i-1, 3, x);
-            console.log(buttonArray)
-        }
-        else if (buttonArray[i] == '/'){
-            x = buttonArray[i-1] / buttonArray[i+1];
-            buttonArray.splice(i-1, 3, x);
-            console.log(buttonArray);
-        }}
-    for(let j=0; j<buttonArray.length-1; j++){
-        //do the same shit as for the multiply and divide signs to evaluate for the rest of button Array.  this should give hte result
-        if(buttonArray[j] === '+'){
-            x = buttonArray[j-1] + buttonArray[j+1];
-            buttonArray.splice(j-1, 3, x);
-            console.log(buttonArray)
-        }
-        else if (buttonArray[j] == '-'){
-            x = buttonArray[j-1] - buttonArray[j+1];
-            buttonArray.splice(j-1, 3, x);
-            console.log(buttonArray);
-        }}
+    console.log('equals: [' + buttonArray + ']')
+    megastring += screenstring;
+    happening.innerHTML = megastring;
+
+    //use previously defined functions
+    //first do mult/divide for PEMDOS
+    //then do add subtract
+    //then since the functions return an array, use resultArray[0]
+    //to retrieve the correct result
+    let addSubArray = multiplyDivideFunction(buttonArray);
+    let resultArray = addSubtractFunction(addSubArray);
         
-    //by now, buttonArray should only be one entry.  that should be the result
-    let result = buttonArray[0];
+    let result = resultArray[0];
     console.log(result);
     screenstring = result;
     screen.innerHTML = screenstring;
 
-        
-    
-    
-    /*let result; //declare variable that will be result
-    //add lastest entry to megastring
-    megastring += screenstring;
-    happening.innerHTML = megastring;
-    console.log(megastring[megastring.length-1]);
-    //if last character of megastring is an operator, slice it off
-    if(megastring[megastring.length-1] === '+' || megastring[megastring.length-1] === '-' || megastring[megastring.length-1] === '*' || megastring[megastring.length-1] === '/'){
-        megastring = megastring.slice(0, -1);
-        console.log(megastring);
-    } 
-    result = eval(megastring);
-    console.log(result);
-    //now fix bug of what happens next
-    screenstring = result;
-    screen.innerHTML = screenstring;*/
-    afterEquals = true; //let next operator know 
+    afterEquals = true; 
 }
 //equals event handler
 equalsButton.addEventListener('click', equalsFunction);
@@ -200,6 +220,10 @@ let clearEntryFunction = function(){
 }
 //eventhandler for CE button
 clearEntryButton.addEventListener('click', clearEntryFunction)
+
+function negativeButton () {
+    //add code for negative button
+}
 
 //the function for clear button to clear the screen
 let clearFunction = function (event) {
