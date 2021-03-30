@@ -13,6 +13,9 @@ let nine = document.getElementById('nine');
 //define variable for +/- button
 let positiveNegativeButton = document.getElementById('positivenegative')
 
+//define variable for percentage button
+let percentageButton = document.getElementById('percent');
+
 //define array of number buttons
 let numArray = [zero, one, two, three, four, five, six, seven, eight, nine]
 
@@ -65,6 +68,15 @@ function positiveNegativeFunction() {
 //event listener for the +/- button
 positiveNegativeButton.addEventListener('click', positiveNegativeFunction);
 
+//this function will make hte current entry a percentage  i.e. will multiply by .01
+function percentage(){
+    let currentScreenNumber = parseFloat(screenstring);
+    let percentageScreenNumber = currentScreenNumber * .01;
+    screenstring = percentageScreenNumber.toString();
+    screen.innerHTML = screenstring;
+}
+//add an event listener for the percentage button
+percentageButton.addEventListener('click', percentage);
 
 //this function puts the number of the button onto the screen
 function numFunction (event) {
@@ -101,10 +113,6 @@ function numFunction (event) {
     }
     //display screenstring in screen
     screen.innerHTML = screenstring;
-    
-    //need to make this an input string    
-    //should probably take decimal out of hte array and create a separate event listner for it to append to string, but include removeEventListener if it is clicked once so it cannot be clicked twice
-        
     }
 
 //this function is to resume normal hover/active for buttons after an overflow
@@ -123,6 +131,7 @@ let buttonHandler = function (numButton) {
 //use iteration foreach to do num function to each array numbutton
 numArray.forEach(buttonHandler);
 
+//function for when press decimal button
 function decimalFunction () {
     //concat screenstring with a decimal pt
     screenstring = screenstring + '.'
@@ -145,7 +154,7 @@ let operatorFunction = function(event){
         
            
     }
-    
+    //if operator not hit right after a result, then this part will run:
     else if(screenstring.length !== 0){ //make sure screestring not empty otherwise will keep adding NaN to array
         //numberArray.push(parseFloat(screenstring));
         buttonArray.push(parseFloat(screenstring));
@@ -178,9 +187,7 @@ minusButton.addEventListener('click', operatorFunction);
 divideButton.addEventListener('click', operatorFunction);
 multiplyButton.addEventListener('click', operatorFunction);
 
-//function for equals button.  
-
-
+//next functions used to calculate results when hit equals button.  
 
 //define a reusable function to solve multiplication and division in the aray 
 //and leave only + - operations
@@ -287,9 +294,6 @@ let clearEntryFunction = function(){
 //eventhandler for CE button
 clearEntryButton.addEventListener('click', clearEntryFunction)
 
-function negativeButton () {
-    //add code for negative button
-}
 
 //the function for clear button to clear the screen
 let clearFunction = function (event) {
