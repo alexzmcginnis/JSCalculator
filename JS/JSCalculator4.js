@@ -1,6 +1,4 @@
-//***!!still need to do function/eventhandler of positive/negative button  */
-
-//define variables for buttons with values and decimal
+//define variables for buttons with values
 let zero = document.getElementById('zero');
 let one = document.getElementById('one');
 let two = document.getElementById('two');
@@ -12,10 +10,13 @@ let seven = document.getElementById('seven');
 let eight = document.getElementById('eight');
 let nine = document.getElementById('nine');
 
+//define variable for +/- button
+let positiveNegativeButton = document.getElementById('positivenegative')
+
 //define array of number buttons
 let numArray = [zero, one, two, three, four, five, six, seven, eight, nine]
 
-//decimal button handled differently
+//define variable for decimal button, decimal button handled differently
 let decimalButton = document.getElementById('decimal');
 
 //define variables for buttons with artithmetic functions
@@ -32,43 +33,90 @@ let clearButton = document.getElementById('clear');
 let clearEntryButton = document.getElementById('clearEntry')
 
 //define the screen and what goes in screen
-let screen = document.getElementById('screen');
+let screen = document.getElementById('entry');
 let screenstring = '0';
+//the megastring will be all the entries and operations
+let allEntries = document.getElementById(['allEntries'])
 
-//element that will show the numbers and elements
-let happening = document.getElementById('happening');
-//string to add all that is happening
-let megastring = ''; //then put this to happenings innerhtml
+//element that will show the numbers and operations
+let megastring = ''; 
 
-//define the arrays that will hold number and operator values to be operated upon as app is used
-let numberArray = [];
-let operatorArray = [];
+//the button array will collect number and operator values
 let buttonArray = [];
 
+//this variable will be so after hitting equals can resume arithmetic
+let afterEquals = false; 
+//this will let know if continuing a calculation after hitting the equals sign
+let continuingEquation = false;
+//boolean true when no number has been entered yet
+let beginning = true;
+
+//this function takes the current entry and makes it negative (or pos if already neg)
+function positiveNegativeFunction() {
+    if(screenstring[0] != '-' ){
+        screenstring = '-' + screenstring;
+    }else if (screenstring[0] === '-'){
+        screenstring = screenstring.slice(1,);
+    }
+    if( screenstring != 0){
+    screen.innerHTML = screenstring;
+    }
+}
+//event listener for the +/- button
+positiveNegativeButton.addEventListener('click', positiveNegativeFunction);
+
+
+//this function puts the number of the button onto the screen
 function numFunction (event) {
+    //this conditional is so cannot enter more characters than the screen can hold
+    if(screenstring.length >= 9){
+        //if the number is 9 characters, do not add more digits
+        screenstring = screenstring;
+        //remove hover and active class so obvious cannot add more numbers
+        numArray.forEach(button => button.className='numberButtonOverflow')
+    }
     //this will concat the value of whatever button pressed to the string.  the conditional is so whole numbers do not lead with a 0
-    if ( screenstring === '0'){
+    else if ( screenstring === '0'){
         screenstring = event.target.value
+    }else if ( screenstring === '-0'){
+        screenstring = '-' + event.target.value
     }
     else if(screenstring !== 0 && afterEquals === false) {
         screenstring = screenstring + event.target.value;
-        
     }
-    else if (afterEquals === true){
+    else if (afterEquals === true && continuingEquation === true){
+        //this conditional is for if after hitting equals keep doing operations to answer
         screenstring = event.target.value;
         afterEquals = false; //reset
     }
-      //display screenstring in screen
+    else if (afterEquals === true && continuingEquation === false){
+        //this conditional is if afer hitting equals, just enter new number without hitting clear
+        beginning = true;
+        buttonArray = [];
+        megastring = '0';
+        screenstring = event.target.value;
+        afterEquals = false;
+
+
+    }
+    //display screenstring in screen
     screen.innerHTML = screenstring;
+    
     //need to make this an input string    
     //should probably take decimal out of hte array and create a separate event listner for it to append to string, but include removeEventListener if it is clicked once so it cannot be clicked twice
         
     }
 
-
+//this function is to resume normal hover/active for buttons after an overflow
+function numReturnToNormal () {
+    if(megastring[megastring.length-1] === '+' || megastring[megastring.length-1] === '-' || megastring[megastring.length-1] === '*' || megastring[megastring.length-1] === '/'   ){
+        numArray.forEach(button => button.className='numberButton')
+    }
+}
 
 //named event handler --> this will add the number of the button to the string when clicking.
 let buttonHandler = function (numButton) {
+    numButton.addEventListener('mouseover', numReturnToNormal)
     numButton.addEventListener('click', numFunction);
     
 }
@@ -84,38 +132,45 @@ function decimalFunction () {
 //add event listener to the decimal button so runs decimalFunction when clicked
 decimalButton.addEventListener('click', decimalFunction)
 
-//when arithmetic operation is clicked, need to slice this string and the number parts need to be converted into numbers instead of strings.
-//how to handle parenthesees?
-//should it give total after hitting each arithmetic sign or only when hit equal?
-//each time an arithmetic operator hit, should push the numbers on screen into an array ...then use for each iterator to make each array item from str-->number
-//should probably keep screenstring with string values for operators to display in small font... and have a separate screen to display whatever numbers typing in/ value as calculations are done
-
-//start the plus function
+//this function will run when an operator button is hit (+,-,*,/)
 let operatorFunction = function(event){
-  
+    //this conditional to use result if just used the equals sign
     if(afterEquals === true && screenstring.length!== 0){
-        //function so can resume normal arithmetic
+        megastring = screenstring;
         megastring += event.target.value; 
-        happening.innerHTML = megastring;
+        buttonArray=[parseFloat(screenstring)];
+        buttonArray.push(event.target.value)
+        console.log(buttonArray)
+        continuingEquation = true;
+        
            
     }
     
     else if(screenstring.length !== 0){ //make sure screestring not empty otherwise will keep adding NaN to array
-        numberArray.push(parseFloat(screenstring));
+        //numberArray.push(parseFloat(screenstring));
         buttonArray.push(parseFloat(screenstring));
-        
-        megastring += screenstring;
+        //this conditional is just so if it is the first entry, the 0 
+        //does not hang out at the beginning of megastring.  set 
+        //beginning to false after the first number is added to megastring
+        if (beginning === false){
+            megastring += screenstring;
+        }
+        if (beginning === true){
+            megastring = screenstring;
+            beginning = false;
+        }
         screenstring = '';
         //console.log(numberArray);
-        operatorArray.push(event.target.value);
+        //operatorArray.push(event.target.value);
         buttonArray.push(event.target.value);
         megastring += event.target.value;
         console.log(buttonArray);
         console.log(megastring);
         //right now the h3 happening is overwritten , need to add code to keep track of all operations/numbers
-        happening.innerHTML = megastring;
+        allEntries.innerHTML = megastring;
 
     }  
+    
 }
 //plusButton event handler to add plus function on click
 plusButton.addEventListener('click', operatorFunction);
@@ -125,16 +180,14 @@ multiplyButton.addEventListener('click', operatorFunction);
 
 //function for equals button.  
 
-//this variable will be so after hitting equals can resume arithmetic
-let afterEquals = false; 
+
 
 //define a reusable function to solve multiplication and division in the aray 
 //and leave only + - operations
 let multiplyDivideFunction = (bArray) => {
     let i=1;
     while(i<bArray.length){
-        //console.log(i);
-        //every odd i because those are the operators
+        //every odd index because those are the operators
         if(bArray[i] === '+' || bArray[i] === '-'){
             i = i+ 2;
         }
@@ -146,11 +199,20 @@ let multiplyDivideFunction = (bArray) => {
    
         }
         if(bArray[i] === '/'){
+            //put conditional if bArray[i+1] === 0 because cannot divide by 0
+            if( bArray[i+1] === 0){
+                console.log ('error')
+                screen.innerHTML = 'ERROR';
+                screenstring = 0;
+                return bArray = [];
+                
+            }else{
             let x = bArray[i-1] / bArray[i+1];
             console.log('x:  ' + x)
             bArray.splice(i-1, 3, x);
             //use recursion to do same thing until all multiplies are done
             multiplyDivideFunction(bArray)
+            }
    
         }
         
@@ -160,7 +222,7 @@ let multiplyDivideFunction = (bArray) => {
 
 //now do a reusable function for add subtract,
 //this will be applied ot the array that has multiplication/division 
-//removed
+//removed after performing those operations
 
 let addSubtractFunction = (bArray) =>{
     let i = 1;
@@ -185,12 +247,11 @@ let addSubtractFunction = (bArray) =>{
 }
 
 let equalsFunction = function () {
-    numberArray.push(parseFloat(screenstring));
+    //numberArray.push(parseFloat(screenstring));
     buttonArray.push(parseFloat(screenstring));
     console.log('equals: [' + buttonArray + ']')
     megastring += screenstring;
-    happening.innerHTML = megastring;
-
+    allEntries.innerHTML = megastring;
     //use previously defined functions
     //first do mult/divide for PEMDOS
     //then do add subtract
@@ -198,12 +259,17 @@ let equalsFunction = function () {
     //to retrieve the correct result
     let addSubArray = multiplyDivideFunction(buttonArray);
     let resultArray = addSubtractFunction(addSubArray);
-        
     let result = resultArray[0];
     console.log(result);
     screenstring = result;
+    let floatToString = screenstring.toString();
+    if(floatToString.length > 9){
+        screenstring = 'ERROR';
+        megastring += '<br /> Error: Too Big!';
+        allEntries.innerHTML = megastring;
+    }
+    screenstring = screenstring.toString();
     screen.innerHTML = screenstring;
-
     afterEquals = true; 
 }
 //equals event handler
@@ -230,12 +296,11 @@ let clearFunction = function (event) {
     screenstring = event.target.value;
     screen.innerHTML = screenstring;
     decimalButton.addEventListener('click', decimalFunction)
-    numberArray = [];
-    operatorArray = [];
     buttonArray = [];
-    megastring = '';
-    happening.innerHTML = '';
+    megastring = '0';
+    allEntries.innerHTML = megastring;
     afterEquals = false; //resets this
+    beginning = true;
 }
 //the event handler so clear will do clearFunction when clicked
 clearButton.onclick = clearFunction;
